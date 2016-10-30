@@ -21,7 +21,7 @@ System.out.println(basePath);
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>CampusSearch</title>
+    <title>IRSys</title>
 
     <!-- Bootstrap Core CSS -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
@@ -50,10 +50,10 @@ System.out.println(basePath);
             <div class="row">
                 <div class="col-lg-12">
                     <div class="intro-message">
-                        <h1>CampusSearch</h1>
-                        <h3 style="margin-bottom:50px;">search what you want</h3>
+                        <h1>IRSys</h1>
+                        <h3 style="margin-bottom:50px;">search CNKI</h3>
                         <div id="Layer1" style="color:#000000;" class="col-lg-8 col-lg-offset-2">
-						  <form id="form1" name="form1" method="get" action="servlet/CampusServer">
+						  <form id="form1" name="form1" method="get" action="servlet/IRServer">
 						    <div class="input-group">
 				               <input name="query" type="text" class="form-control" placeholder="清华大学">
 				               <span class="input-group-btn">
@@ -69,13 +69,13 @@ System.out.println(basePath);
         <div class="container">
             <div class="row">
                 <div class="col-lg-12">
-                    <p class="copyright small">Producer 施韶韵 游宇铭</p>
+                    <p class="copyright small">Producer 施韶韵</p>
                 </div>
             </div>
         </div>
     </div>
-    
-    
+
+
 </body>
 
 </html>

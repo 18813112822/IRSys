@@ -18,14 +18,14 @@ import org.apache.lucene.util.Version;
 import javax.el.MapELResolver;
 import javax.xml.parsers.*;
 
-public class CampusIndexer {
+public class IRIndexer {
     private Analyzer analyzer;
     private IndexWriter indexWriter;
     private HashMap<String, Float> avgLength = new HashMap<String, Float>();
     
     private int MaxTitleLength = 30;
     
-    public CampusIndexer(String indexDir) {
+    public IRIndexer(String indexDir) {
 //      analyzer = new AnsjAnalysis();
     	analyzer = new AnsjIndexAnalysis();
 //    	analyzer = new MyAnalyzer();
@@ -126,7 +126,7 @@ public class CampusIndexer {
         }
     }
     public static void main(String[] args) {
-        CampusIndexer indexer = new CampusIndexer("forIndex/index");
+        IRIndexer indexer = new IRIndexer("forIndex/index");
         indexer.indexSpecialFile("input/campus.xml");
         indexer.saveGlobals("forIndex/global.txt");
     }

@@ -7,8 +7,8 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 String imagePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+"/";
 %>
 
-<!DOCTYPE html>  
-<html xmlns="http://www.w3.org/1999/xhtml"> 
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>result</title>
@@ -16,7 +16,7 @@ String imagePath = request.getScheme()+"://"+request.getServerName()+":"+request
 <link href="../css/landing-page.css" rel="stylesheet">
 <link href="../font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
 <link href="../http://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic" rel="stylesheet" type="text/css">
-    
+
 <style type="text/css">
 <!--
 
@@ -68,9 +68,9 @@ String imagePath = request.getScheme()+"://"+request.getServerName()+":"+request
 %>
 
 <div class = "col-lg-12" style = "margin-top:10px;"></div>
-<div class = "col-lg-2 title"><h3>CampusSearch</h3></div>
+<div class = "col-lg-2 title"><h3>IRSys</h3></div>
 <div style="color:#00FF00;margin-top:20px;margin-left:-10px;" class="Searchinput col-lg-4">
-    <form id="form1" name="form1" method="get" action="CampusServer">
+    <form id="form1" name="form1" method="get" action="IRServer">
       <div class="input-group">
                <input name="query" type="text" class="form-control" value="<%=currentQuery%>">
                <span class="input-group-btn">
@@ -87,18 +87,18 @@ String imagePath = request.getScheme()+"://"+request.getServerName()+":"+request
 <div class = "col-lg-4 col-lg-offset-2" style = "font-size:20px;">
   <p>
       <%if(currentPage>1){ %>
-          <a href="CampusServer?query=<%=currentQuery%>&page=<%=currentPage-1%>">上一页</a>
+          <a href="IRServer?query=<%=currentQuery%>&page=<%=currentPage-1%>">上一页</a>
       <%}else{ %>
           <a>上一页</a>
       <%}; %>
       <%for (int i=Math.max(1,currentPage-5);i<currentPage;i++){%>
-          <a href="CampusServer?query=<%=currentQuery%>&page=<%=i%>"><%=i%></a>
+          <a href="IRServer?query=<%=currentQuery%>&page=<%=i%>"><%=i%></a>
       <%}; %>
       <strong><%=currentPage%></strong>
       <%for (int i=currentPage+1;i<=currentPage+5;i++){ %>
-          <a href="CampusServer?query=<%=currentQuery%>&page=<%=i%>"><%=i%></a>
+          <a href="IRServer?query=<%=currentQuery%>&page=<%=i%>"><%=i%></a>
       <%}; %>
-      <a href="CampusServer?query=<%=currentQuery%>&page=<%=currentPage+1%>">下一页</a>
+      <a href="IRServer?query=<%=currentQuery%>&page=<%=currentPage+1%>">下一页</a>
   </p>
 </div>
 </div>
@@ -126,27 +126,27 @@ String imagePath = request.getScheme()+"://"+request.getServerName()+":"+request
         <div class = "col-lg-7"><%=texts[i]%></div>
         </div><%};%>
     <%}else{ %>
-       <!-- <p><tr><h3>no such result</h3></tr></p> --> 
+       <!-- <p><tr><h3>no such result</h3></tr></p> -->
     <%}; %>
   </div>
   </div>
-  
+
 <div class = "col-lg-12">
 <div class = "col-lg-4 col-lg-offset-2" style = "font-size:20px;">
   <p>
       <%if(currentPage>1){ %>
-          <a href="CampusServer?query=<%=currentQuery%>&page=<%=currentPage-1%>">上一页</a>
+          <a href="IRServer?query=<%=currentQuery%>&page=<%=currentPage-1%>">上一页</a>
       <%}else{ %>
           <a>上一页</a>
       <%}; %>
       <%for (int i=Math.max(1,currentPage-5);i<currentPage;i++){%>
-          <a href="CampusServer?query=<%=currentQuery%>&page=<%=i%>"><%=i%></a>
+          <a href="IRServer?query=<%=currentQuery%>&page=<%=i%>"><%=i%></a>
       <%}; %>
       <strong><%=currentPage%></strong>
       <%for (int i=currentPage+1;i<=currentPage+5;i++){ %>
-          <a href="CampusServer?query=<%=currentQuery%>&page=<%=i%>"><%=i%></a>
+          <a href="IRServer?query=<%=currentQuery%>&page=<%=i%>"><%=i%></a>
       <%}; %>
-      <a href="CampusServer?query=<%=currentQuery%>&page=<%=currentPage+1%>">下一页</a>
+      <a href="IRServer?query=<%=currentQuery%>&page=<%=currentPage+1%>">下一页</a>
   </p>
 </div>
 </div>

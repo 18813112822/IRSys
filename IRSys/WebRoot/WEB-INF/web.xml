@@ -2,13 +2,13 @@
 <web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee"
  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee   http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
  <servlet>
-  <display-name>CampusServer</display-name>
-  <servlet-name>CampusServer</servlet-name>
-  <servlet-class>CampusServer</servlet-class>
+  <display-name>IRServer</display-name>
+  <servlet-name>IRServer</servlet-name>
+  <servlet-class>IRServer</servlet-class>
  </servlet>
  <servlet-mapping>
-  <servlet-name>CampusServer</servlet-name>
-  <url-pattern>/servlet/CampusServer</url-pattern>
+  <servlet-name>IRServer</servlet-name>
+  <url-pattern>/servlet/IRServer</url-pattern>
  </servlet-mapping>
  <welcome-file-list>
   <welcome-file>index.jsp</welcome-file>

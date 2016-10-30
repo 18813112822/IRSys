@@ -23,7 +23,7 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.store.FSDirectory;
 
-public class CampusSearcher {
+public class IRSearcher {
 	private IndexReader reader;
 	private IndexSearcher searcher;
 	private Analyzer analyzer;
@@ -32,7 +32,7 @@ public class CampusSearcher {
 				new String[] {" ", "的", "是", "."}
 			));
 
-	public CampusSearcher(String indexdir) {
+	public IRSearcher(String indexdir) {
 		analyzer = new AnsjAnalysis();
 //		analyzer = new MyAnalyzer();
 //		analyzer = new AnsjIndexAnalysis(true);
@@ -116,7 +116,7 @@ public class CampusSearcher {
 	}
 
 	public static void main(String[] args) {
-		CampusSearcher search = new CampusSearcher("forIndex/index");
+		IRSearcher search = new IRSearcher("forIndex/index");
 		search.loadGlobals("forIndex/global.txt");
 		System.out.println("avg length = " + search.getAvg("title"));
 
