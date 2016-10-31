@@ -111,19 +111,24 @@ String imagePath = request.getScheme()+"://"+request.getServerName()+":"+request
   <div>
   <%
     String[] titles=(String[]) request.getAttribute("titles");
-    String[] urls=(String[]) request.getAttribute("urls");
-    String[] texts=(String[]) request.getAttribute("texts");
-    for(int i = 0;i<titles.length;i++){
+    String[] titles_en=(String[]) request.getAttribute("titles_en");
+    String[] abstracts=(String[]) request.getAttribute("abstracts");
+    for(int i = 0; i<titles.length; i++){
     	if(titles[i].length() > 30) {
     		titles[i] = titles[i].substring(0, 30) + "...";
+    	}
+    }
+    for(int i = 0; i<titles_en.length; i++){
+    	if(titles_en[i].length() > 30) {
+    		titles_en[i] = titles_en[i].substring(0, 30) + "...";
     	}
     }
     if(titles!=null && titles.length>0){
         for(int i=0;i<titles.length;i++){%>
         <div class = "col-lg-12" style = "margin-bottom:30px;margin-left:30px;">
-        <p class = "col-lg-7" style="font-size:25px; margin:-2px;color:#1a0dab;"><a href=<%="http://"+urls[i]%>><%=titles[i]%></a></p>
-        <p class = "col-lg-7" style = "font-size:15px; margin: -2px;color:#006621;"><%=urls[i]%></p>
-        <div class = "col-lg-7"><%=texts[i]%></div>
+        <p class = "col-lg-7" style="font-size:25px; margin:-2px;color:#1a0dab;"><%=titles[i]%></p>
+        <p class = "col-lg-7" style = "font-size:15px; margin: -2px;color:#006621;"><%=titles_en[i]%></p>
+        <div class = "col-lg-7"><%=abstracts[i]%></div>
         </div><%};%>
     <%}else{ %>
        <!-- <p><tr><h3>no such result</h3></tr></p> -->

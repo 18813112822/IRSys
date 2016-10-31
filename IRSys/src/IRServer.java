@@ -86,20 +86,13 @@ public class IRServer extends HttpServlet {
     }
 
     private ScoreDoc[] multiQuery(String queryString, int maxnum) {
-        HashMap<String, Float> weight = new HashMap<String, Float>() {
-            {
-                put("title", (float)1.0);
-                put("url", (float)0.9);
-                put("h1", (float)0.5);
-                put("h2", (float)0.2);
-                put("h3", (float)0.1);
-                put("h4", (float)0.1);
-                put("h5", (float)0.1);
-                put("h6", (float)0.1);
-                put("text", (float)0.05);
-            }
-        };
-
+        HashMap<String, Float> weight = new HashMap<String, Float>();
+        weight.put("题名", (float) 1.0);
+        weight.put("英文篇名", (float) 1.0);
+        weight.put("摘要", (float) 0.7);
+        weight.put("英文摘要", (float) 0.7);
+        
+        
         HashMap<Integer, ScoreDoc> docs = new HashMap<>();
 
         for (HashMap.Entry<String, Float> entry : weight.entrySet()) {
@@ -110,29 +103,12 @@ public class IRServer extends HttpServlet {
             ScoreDoc[] tmpdocs = results.scoreDocs;
             normalizeScore(tmpdocs);
             for (ScoreDoc document : tmpdocs) {
-//				if (document.doc == 51397 || document.doc == 25320){
-//					System.out.println(search.getDoc(document.doc).get("title"));
-//					System.out.println(document.score);
-//				}
-
-//				if (!TextCache.containsKey(document.doc))
-//					TextCache.put(document.doc, entry.getKey());
-//				else {
-//					float w1 = weight.get(TextCache.get(document.doc));
-//					float w2 = entry.getValue();
-//					if (w2 > w1)
-//						TextCache.put(document.doc, entry.getKey());
-//				}
-
                 if (docs.containsKey(docs.containsKey(document.doc))) {
                     docs.get(document.doc).score += entry.getValue() * document.score;
                 } else {
                     docs.put(document.doc, new ScoreDoc(document.doc, entry.getValue() * document.score));
                 }
             }
-//			for (HashMap.Entry<Integer, ScoreDoc> entry2: docs.entrySet()){
-//				System.out.println(entry.getKey()+":"+entry2.getValue());
-//			}
         }
 
 
@@ -149,48 +125,11 @@ public class IRServer extends HttpServlet {
                     return -1;
                 if (o1.score < o2.score)
                     return 1;
-
-                int l1 = search.getDoc(o1.doc).get("url").length();
-                int l2 = search.getDoc(o2.doc).get("url").length();
-                if (l1 < l2)
-                    return -1;
-                if (l1 > l2)
-                    return 1;
-
-                float r1 = Float.parseFloat(search.getDoc(o1.doc).get("pagerank"));
-                float r2 = Float.parseFloat(search.getDoc(o1.doc).get("pagerank"));
-                if (r1 > r2)
-                    return -1;
-                if (r1 < r2)
-                    return 1;
                 return 0;
             }
         });
         return ans;
     }
-
-    private class HLPosition {
-        public ArrayList<Integer> starts = new ArrayList<>();
-        public ArrayList<Integer> ends = new ArrayList<>();
-
-        private int max(int a, int b) {
-            return a > b ? a : b;
-        }
-
-        private int min(int a, int b) {
-            return a < b ? a : b;
-        }
-
-        public void add(int start, int end) {
-            int length = starts.size();
-            for (int i = 0; i < length; i++) {
-                if (end < starts.get(i)) {
-
-                }
-            }
-        }
-    }
-
 
     private ArrayList<Integer> allIndexOf(String text, String substring) {
         ArrayList<Integer> pos = new ArrayList<>();
@@ -203,26 +142,24 @@ public class IRServer extends HttpServlet {
         return pos;
     }
 
-    private ArrayList<Integer> splitIndex(char[] flags, int length) {
+    private ArrayList<Integer> getSplitIndex(char[] flags) {
         ArrayList<Integer> split = new ArrayList<>();
-        if (length == 0) {
+        if (flags.length == 0) {
             return split;
         }
-        int pos = 0;
-        char pre = flags[0];
-
-        for (int i = 1; i < length; i++) {
-            if (flags[i] != flags[pos]) {
-                pos = i;
-                pre = flags[i];
-                split.add(pos);
+        split.add(0);
+        for (int i = 1; i < flags.length; i++) {
+            if (flags[i] != flags[i-1]) {
+                split.add(i);
             }
         }
-        split.add(length);
+        split.add(flags.length);
         return split;
     }
 
     private String highlightText(String text, String querystring) {
+    	if (text == null)
+    		return "";
         List<Term> terms = IndexAnalysis.parse(querystring);
         ArrayList<String> arraystrings = new ArrayList<>();
         for (Term term : terms) {
@@ -231,7 +168,7 @@ public class IRServer extends HttpServlet {
             arraystrings.add(term.toString());
         }
         String[] strings = arraystrings.toArray(new String[0]);
-
+        
         char[] flags = new char[text.length()];
         for (int i = 0; i < text.length(); i++)
             flags[i] = 0;
@@ -244,9 +181,7 @@ public class IRServer extends HttpServlet {
             }
         }
 
-        ArrayList<Integer> split = splitIndex(flags, text.length());
-        ArrayList<String> substrings = new ArrayList<>();
-
+        ArrayList<Integer> split = getSplitIndex(flags);
         String ans = "";
         for (int i = 1; i < split.size(); i++) {
             String substring = text.substring(split.get(i - 1), split.get(i));
@@ -286,26 +221,14 @@ public class IRServer extends HttpServlet {
         }
         if (queryString == null) {
             System.out.println("null query");
-            //request.getRequestDispatcher("/Image.jsp").forward(request, response);
         } else {
             System.out.println(queryString);
             System.out.println(URLDecoder.decode(queryString, "utf-8"));
             System.out.println(URLDecoder.decode(queryString, "gb2312"));
 
-
-//			IndexReader reader = IndexReader.open(FSDirectory.open(new File(indexDir+"/index")));
-//			Dictionary dict = new LuceneDictionary(reader, "text");
-//			SpellChecker spellChecker = new SpellChecker();
-//			String[] sugs = spellChecker.suggestSimilar(queryString, 5);
-//			for (String str: sugs){
-//				System.out.println(str);
-//			}
-//			spellChecker.close();
-
             String[] titles = null;
-            String[] urls = null;
-            String[] texts = null;
-//			TopDocs results = search.searchQuery(queryString, "title", 100);
+            String[] titles_en = null;
+            String[] abstracts = null;
             TextCache.clear();
             ScoreDoc[] results = multiQuery(queryString, 100);
             if (results != null) {
@@ -313,17 +236,22 @@ public class IRServer extends HttpServlet {
                 if (hits != null) {
                     System.out.println(hits.length);
                     titles = new String[hits.length];
-                    urls = new String[hits.length];
-                    texts = new String[hits.length];
+                    titles_en = new String[hits.length];
+                    abstracts = new String[hits.length];
                     for (int i = 0; i < hits.length && i < PAGE_RESULT; i++) {
                         Document doc = search.getDoc(hits[i].doc);
-                        titles[i] = doc.get("title");
-                        urls[i] = picDir + doc.get("url");
-                        texts[i] = doc.get("text");
-                        texts[i] = highlightText(texts[i], queryString).replaceAll("\n\r", " ").replaceAll("\n", " ");
-                        System.out.println(texts[i]);
-                        System.out.println("doc=" + hits[i].doc + " score=" + hits[i].score
-                                           + " pagerank=" + doc.get("pagerank") + " title=" + doc.get("title") + " url=" + doc.get("url"));
+                        titles[i] = doc.get("题名");
+                        if (titles[i] == null)
+                        	titles[i] = "";
+                        titles_en[i] = doc.get("英文篇名");
+                        if (titles_en[i] == null)
+                        	titles_en[i] = "";
+                        abstracts[i] = doc.get("摘要");
+                        if (abstracts[i] == null)
+                        	abstracts[i] = "";
+                        abstracts[i] = highlightText(abstracts[i], queryString).replaceAll("\n\r", " ").replaceAll("\n", " ");
+                        System.out.println(abstracts[i]);
+                        System.out.println("doc=" + hits[i].doc + " score=" + hits[i].score + " title=" + doc.get("题名"));
                     }
 
                 } else {
@@ -335,8 +263,8 @@ public class IRServer extends HttpServlet {
             request.setAttribute("currentQuery", queryString);
             request.setAttribute("currentPage", page);
             request.setAttribute("titles", titles);
-            request.setAttribute("urls", urls);
-            request.setAttribute("texts", texts);
+            request.setAttribute("titles_en", titles_en);
+            request.setAttribute("abstracts", abstracts);
             request.getRequestDispatcher("/show.jsp").forward(request,
                     response);
         }
