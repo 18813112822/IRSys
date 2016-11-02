@@ -230,7 +230,11 @@ public class IRServer extends HttpServlet {
             String[] titles_en = null;
             String[] abstracts = null;
             TextCache.clear();
-            ScoreDoc[] results = multiQuery(queryString, 100);
+//            ScoreDoc[] results = multiQuery(queryString, 100);
+            TopDocs docresults = search.searchQuery(queryString, "", 100);
+            ScoreDoc[] results = null;
+            if (docresults != null)
+            	results = docresults.scoreDocs;
             if (results != null) {
                 ScoreDoc[] hits = showList(results, page);
                 if (hits != null) {

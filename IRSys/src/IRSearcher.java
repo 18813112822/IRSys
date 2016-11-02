@@ -14,6 +14,7 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.queryParser.MultiFieldQueryParser;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
@@ -22,14 +23,16 @@ import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.util.Version;
 
 public class IRSearcher {
 	private IndexReader reader;
 	private IndexSearcher searcher;
 	private Analyzer analyzer;
-	private HashMap<String, Float> avgLength = new HashMap<String, Float>();
+	private HashMap<String, Float> globals = new HashMap<String, Float>();
 	public static final Set<String> STOPWORDS = new HashSet<String>(Arrays.asList(
-				new String[] {" ", "的", "是", "."}
+//				new String[] {" ", "的", "是", "."}
+				new String[] {}
 			));
 
 	public IRSearcher(String indexdir) {
@@ -39,7 +42,7 @@ public class IRSearcher {
 		try {
 			reader = IndexReader.open(FSDirectory.open(new File(indexdir)));
 			searcher = new IndexSearcher(reader);
-			searcher.setSimilarity(new SimpleSimilarity());
+//			searcher.setSimilarity(new SimpleSimilarity());
 			loadGlobals("forIndex/global.txt");
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -48,39 +51,41 @@ public class IRSearcher {
 
 	public TopDocs searchQuery(String queryString, String field, int maxnum) {
 		try {
-			TokenStream tokenStream  = analyzer.tokenStream(field, new StringReader(queryString));
-			CharTermAttribute charTermAttribute = tokenStream.addAttribute(CharTermAttribute.class);
-			System.out.println(field+" tokens:");
-			BooleanQuery query = new BooleanQuery();
-			
-			ArrayList<String> termstrings = new ArrayList<>();
-			while (tokenStream.incrementToken()) {
-				String termStr = charTermAttribute.toString();
-				if (termstrings.contains(termStr))
-					continue;
-				termstrings.add(termStr);
-			}
-			for (String termStr: termstrings){
-//				System.out.println("where is true?");
-				
+			HashMap<String,Float> boosts = new HashMap<String,Float>();
+			boosts.put("题名", 10f);
+			boosts.put("英文篇名", 10f);
+			boosts.put("摘要", 5f);
+			boosts.put("英文摘要", 5f);
+			String[] fields = boosts.keySet().toArray(new String[0]);
+			MultiFieldQueryParser queryParser = new MultiFieldQueryParser(Version.LUCENE_35, fields, analyzer, boosts);
+			Query query = queryParser.parse(queryString);
+
+//			TokenStream tokenStream  = analyzer.tokenStream(field, new StringReader(queryString));
+//			CharTermAttribute charTermAttribute = tokenStream.addAttribute(CharTermAttribute.class);
+//			System.out.println(field+" tokens:");
+//			BooleanQuery query = new BooleanQuery();
+//			
+//			ArrayList<String> termstrings = new ArrayList<>();
+//			while (tokenStream.incrementToken()) {
 //				String termStr = charTermAttribute.toString();
-				if (STOPWORDS.contains(termStr))
-					continue;
-				
-//				System.out.println(termStr+"1");
-				Query subquery = new SimpleQuery(new Term(field, termStr), avgLength.get(field));
+//				if (termstrings.contains(termStr))
+//					continue;
+//				termstrings.add(termStr);
+//			}
+//			for (String termStr: termstrings){
+//				if (STOPWORDS.contains(termStr))
+//					continue;
 //				Query subquery = new TermQuery(new Term(field, termStr));
-				float boost = Float.parseFloat("1.0")/(reader.docFreq(new Term(field, termStr))+1)*termStr.length()/termStr.length();
-				subquery.setBoost(boost);
-				query.add(subquery, Occur.SHOULD);
-				System.out.println(termStr);
-			}
-			
-//			query.setBoost(1.0f);
-			//Weight w=searcher.createNormalizedWeight(query);
-			//System.out.println(w.getClass());
+//				float boost = 1.0f/(reader.docFreq(new Term(field, termStr))+1);
+//				subquery.setBoost(boost);
+//				query.add(subquery, Occur.SHOULD);
+//				System.out.println(termStr);
+//			}
+//			
+////			query.setBoost(1.0f);
+//			//Weight w=searcher.createNormalizedWeight(query);
+//			//System.out.println(w.getClass());
 			TopDocs results = searcher.search(query, maxnum);
-//			System.out.println(results);
 			return results;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -103,7 +108,7 @@ public class IRSearcher {
 			String line = null;
 			while ((line = reader.readLine()) != null) {
 				String[] info = line.split("=");
-				avgLength.put(info[0], Float.parseFloat(info[1]));
+				globals.put(info[0], Float.parseFloat(info[1]));
 			}
 			reader.close();
 		} catch (IOException e) {
@@ -112,20 +117,18 @@ public class IRSearcher {
 	}
 
 	public float getAvg(String field) {
-		return avgLength.get(field);
+		return globals.get(field);
 	}
 
 	public static void main(String[] args) {
 		IRSearcher search = new IRSearcher("forIndex/index");
 		search.loadGlobals("forIndex/global.txt");
-		System.out.println("avg length = " + search.getAvg("title"));
-
-		TopDocs results = search.searchQuery("�����", "title", 100);
+		
+		TopDocs results = search.searchQuery("清华", "题名", 100);
 		ScoreDoc[] hits = results.scoreDocs;
-		for (int i = 0; i < hits.length; i++) { // output raw format
+		for (int i = 0; i < hits.length; i++) {
 			Document doc = search.getDoc(hits[i].doc);
-			System.out.println("doc=" + hits[i].doc + " score="
-			                   + hits[i].score + " picPath= " + doc.get("picPath"));
+			System.out.println("doc=" + hits[i].doc + " score=" + hits[i].score + " title=" + doc.get("题名"));
 		}
 	}
 }

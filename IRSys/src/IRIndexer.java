@@ -9,6 +9,7 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
@@ -24,11 +25,13 @@ public class IRIndexer {
 //    	analyzer = new MyAnalyzer();
         try {
             IndexWriterConfig iwc = new IndexWriterConfig(Version.LUCENE_35, analyzer);
+            iwc.setOpenMode(OpenMode.CREATE);
             Directory dir = FSDirectory.open(new File(indexDir));
             indexWriter = new IndexWriter(dir, iwc);
+//          indexWriter.setSimilarity(new SimpleSimilarity());
+            
 //            Analyzer test = new MyAnalyzer();
 //            TokenStream tokenStream  = test.tokenStream("", new StringReader(""));
-//            indexWriter.setSimilarity(new SimpleSimilarity());
         } catch (IOException e) {
             e.printStackTrace();
         }
