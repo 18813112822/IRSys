@@ -113,15 +113,17 @@ String imagePath = request.getScheme()+"://"+request.getServerName()+":"+request
     String[] titles=(String[]) request.getAttribute("titles");
     String[] titles_en=(String[]) request.getAttribute("titles_en");
     String[] abstracts=(String[]) request.getAttribute("abstracts");
-    for(int i = 0; i<titles.length; i++){
-    	if(titles[i].length() > 30) {
-    		titles[i] = titles[i].substring(0, 30) + "...";
-    	}
-    }
-    for(int i = 0; i<titles_en.length; i++){
-    	if(titles_en[i].length() > 30) {
-    		titles_en[i] = titles_en[i].substring(0, 30) + "...";
-    	}
+    if (titles != null && titles_en != null){
+    	for(int i = 0; i<titles.length; i++){
+        	if(titles[i].length() > 30) {
+        		titles[i] = titles[i].substring(0, 30) + "...";
+        	}
+        }
+        for(int i = 0; i<titles_en.length; i++){
+        	if(titles_en[i].length() > 30) {
+        		titles_en[i] = titles_en[i].substring(0, 30) + "...";
+        	}
+        }
     }
     if(titles!=null && titles.length>0){
         for(int i=0;i<titles.length;i++){%>
