@@ -59,9 +59,24 @@ public class IRIndexer {
     public void indexSpecialFile(String filename) {
     	try(BufferedReader br = new BufferedReader(new FileReader(new File(filename)))) {
     		Document document = null;
+    		String fieldname = "";
+    		String fieldtext = "";
     	    for(String line; (line = br.readLine()) != null; ) {
-    	    	if (!line.startsWith("<"))
+    	    	if (!line.startsWith("<")){
+    	    		if (fieldname.compareTo("") != 0)
+    	    			fieldtext += line;
     	    		continue;
+    	    	}
+    	    	if (fieldname.compareTo("") != 0){
+    	    		Field field = new Field(fieldname, fieldtext, Field.Store.YES, Field.Index.ANALYZED);
+    	    	    document.add(field);
+    	    		if (globals.containsKey(fieldname))
+	    	        	globals.put(fieldname, globals.get(fieldname)+fieldtext.length());
+	    	        else
+	    	        	globals.put(fieldname, (float)fieldtext.length());
+    	    		fieldname = "";
+	    	        fieldtext = "";
+    	    	}
     	        if (line.compareTo("<REC>") == 0){
     	        	if (document != null)
     	        		indexWriter.addDocument(document);
@@ -70,15 +85,8 @@ public class IRIndexer {
     	        }
     	        String[] split = line.split("=");
     	        List<String> spList = Arrays.asList(split);
-    	        String fieldname = split[0].substring(1, split[0].length()-1);
-    	        String fieldtext = String.join("=", spList.subList(1, spList.size()));
-    	        Field field = new Field(fieldname, fieldtext, Field.Store.YES, Field.Index.ANALYZED);
-    	        document.add(field);
-    	        
-    	        if (globals.containsKey(fieldname))
-    	        	globals.put(fieldname, globals.get(fieldname)+fieldtext.length());
-    	        else
-    	        	globals.put(fieldname, (float)fieldtext.length());
+    	        fieldname = split[0].substring(1, split[0].length()-1);
+    	        fieldtext = String.join("=", spList.subList(1, spList.size()));
     	    }
     	    for (HashMap.Entry<String, Float> entry: globals.entrySet()){
             	globals.put(entry.getKey(), entry.getValue()/indexWriter.numDocs());
