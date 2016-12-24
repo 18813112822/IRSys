@@ -11,10 +11,10 @@ import java.util.Map.Entry;
 import java.util.Set;  
 import java.util.TreeSet;
   
-public class Word2VEC {  
+public class Word2Vec {  
       
     public static void main(String[] args) throws IOException {  
-        Word2VEC vec = new Word2VEC();  
+        Word2Vec vec = new Word2Vec();  
         vec.loadModel("/home/felven/word2vec/vectors.bin");  
   
         System.out.println("One word analysis");  

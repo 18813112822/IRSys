@@ -52,14 +52,42 @@ System.out.println(basePath);
                     <div class="intro-message">
                         <h1>IRSys</h1>
                         <h3 style="margin-bottom:50px;">search CNKI</h3>
-                        <div id="Layer1" style="color:#000000;" class="col-lg-8 col-lg-offset-2">
+
+                       	<div id="Layer1" style="color:#000000;" class="col-lg-8 col-lg-offset-2">
 						  <form id="form1" name="form1" method="get" action="servlet/IRServer">
-						    <div class="input-group">
+						    <div class="input-group" style="padding: 10px 40px 10px;">
 				               <input name="query" type="text" class="form-control" placeholder="清华大学">
 				               <span class="input-group-btn">
-				                  <input class="btn btn-default" type="submit" name = "Submit" value="搜索"></input>
+				                  <input class="btn btn-default" type="submit" name="Submit" value="搜索">
 				               </span>
 				            </div><!-- /input-group -->
+
+				            <div class="col-lg-6"  style="padding: 10px 40px 10px">
+					             <div class="input-group">
+					             		<span class="input-group-addon">作者</span>
+							            <input name="author" type="text" class="form-control" placeholder="">
+					             </div>
+				             </div>
+				             <div class="col-lg-6"  style="padding: 10px 40px 10px">
+					             <div class="input-group">
+					             		<span class="input-group-addon">出版单位</span>
+							            <input type="text" class="form-control" placeholder="">
+					             </div>
+				             </div>
+
+				             <div class="col-lg-6"  style="padding: 10px 40px 10px">
+					             <div class="input-group">
+					             		<span class="input-group-addon">最早年份</span>
+							            <input name="author" type="text" class="form-control" placeholder="1901">
+					             </div>
+				             </div>
+				             <div class="col-lg-6"  style="padding: 10px 40px 10px">
+					             <div class="input-group">
+					             		<span class="input-group-addon">最晚年份</span>
+							            <input type="text" class="form-control" placeholder="2020">
+					             </div>
+				             </div>
+
 						  </form>
 						</div>
                     </div>

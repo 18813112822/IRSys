@@ -49,7 +49,7 @@ public class IRIndexer {
             }
             pw.close();
         } catch (IOException e) {
-            
+        	e.printStackTrace();
         }
     }
 
@@ -70,14 +70,17 @@ public class IRIndexer {
     	    		continue;
     	    	}
     	    	if (fieldname.compareTo("") != 0){
-    	    		AbstractField field;
-    	    		if (fieldname.compareTo("年") == 0)
-    	    			field = new NumericField(fieldname, Field.Store.YES, true);
-    	    		else
-    	    			field = new Field(fieldname, fieldtext, Field.Store.YES, Field.Index.ANALYZED);
-    	    	    document.add(field);
+    	    		if (fieldname.compareTo("年") == 0) {
+    	    			NumericField field = new NumericField(fieldname, Field.Store.YES, true);
+    	    			field.setIntValue(Integer.valueOf(fieldtext));
+    	    			document.add(field);
+    	    		}
+    	    		else {
+    	    			Field field = new Field(fieldname, fieldtext, Field.Store.YES, Field.Index.ANALYZED);
+    	    			document.add(field);
+    	    		}
     	    		if (globals.containsKey(fieldname))
-	    	        	globals.put(fieldname, globals.get(fieldname)+fieldtext.length());
+	    	        	globals.put(fieldname, globals.get(fieldname) + fieldtext.length());
 	    	        else
 	    	        	globals.put(fieldname, (float)fieldtext.length());
     	    		fieldname = "";

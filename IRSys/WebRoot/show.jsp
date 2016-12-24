@@ -77,6 +77,31 @@ String imagePath = request.getScheme()+"://"+request.getServerName()+":"+request
                   <input class="btn btn-default" type="submit" name = "Submit" value="搜索"></input>
                </span>
       </div><!-- /input-group -->
+       <div class="col-lg-6"  style="padding: 10px 0px 10px">
+        <div class="input-group">
+        		<span class="input-group-addon">作者</span>
+         <input name="author" type="text" class="form-control" placeholder="">
+        </div>
+       </div>
+       <div class="col-lg-6"  style="padding: 10px 0px 10px">
+        <div class="input-group">
+        		<span class="input-group-addon">出版单位</span>
+         <input type="text" class="form-control" placeholder="">
+        </div>
+       </div>
+       
+       <div class="col-lg-6"  style="padding: 10px 0px 10px">
+        <div class="input-group">
+        		<span class="input-group-addon">最早年份</span>
+         <input name="author" type="text" class="form-control" placeholder="1901">
+        </div>
+       </div>
+       <div class="col-lg-6"  style="padding: 10px 0px 10px">
+        <div class="input-group">
+        		<span class="input-group-addon">最晚年份</span>
+         <input type="text" class="form-control" placeholder="2020">
+        </div>
+       </div>
     </form>
 </div>
 <div class = "col-lg-12" style = "margin-bottom:10px;"></div>
