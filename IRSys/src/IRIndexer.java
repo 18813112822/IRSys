@@ -5,8 +5,10 @@ import java.util.List;
 
 import org.ansj.lucene3.AnsjAnalysis;
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.document.AbstractField;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
+import org.apache.lucene.document.NumericField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
@@ -68,7 +70,11 @@ public class IRIndexer {
     	    		continue;
     	    	}
     	    	if (fieldname.compareTo("") != 0){
-    	    		Field field = new Field(fieldname, fieldtext, Field.Store.YES, Field.Index.ANALYZED);
+    	    		AbstractField field;
+    	    		if (fieldname.compareTo("年") == 0)
+    	    			field = new NumericField(fieldname, Field.Store.YES, true);
+    	    		else
+    	    			field = new Field(fieldname, fieldtext, Field.Store.YES, Field.Index.ANALYZED);
     	    	    document.add(field);
     	    		if (globals.containsKey(fieldname))
 	    	        	globals.put(fieldname, globals.get(fieldname)+fieldtext.length());

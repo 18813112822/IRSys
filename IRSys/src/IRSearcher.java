@@ -59,7 +59,6 @@ public class IRSearcher {
 			String[] fields = boosts.keySet().toArray(new String[0]);
 			MultiFieldQueryParser queryParser = new MultiFieldQueryParser(Version.LUCENE_35, fields, analyzer, boosts);
 			Query query = queryParser.parse(queryString);
-
 //			TokenStream tokenStream  = analyzer.tokenStream(field, new StringReader(queryString));
 //			CharTermAttribute charTermAttribute = tokenStream.addAttribute(CharTermAttribute.class);
 //			System.out.println(field+" tokens:");

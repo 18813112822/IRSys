@@ -1,8 +1,6 @@
 import java.io.Reader;
 import java.util.List;
 
-import javax.xml.bind.ParseConversionEvent;
-
 import org.ansj.domain.Term;
 import org.ansj.splitWord.analysis.IndexAnalysis;
 import org.apache.lucene.analysis.Analyzer;
