@@ -64,6 +64,20 @@ String imagePath = request.getScheme()+"://"+request.getServerName()+":"+request
 <body>
 <%
     String currentQuery=(String) request.getAttribute("currentQuery");
+	if (currentQuery== null)
+		currentQuery= "";
+	String currentAuthor=(String) request.getAttribute("currentAuthor");
+	if (currentAuthor == null)
+		currentAuthor = "";
+	String currentPublisher=(String) request.getAttribute("currentPublisher");
+	if (currentPublisher == null)
+		currentPublisher = "";
+	String currentStartyear=(String) request.getAttribute("currentStartyear");
+	if (currentStartyear == null)
+		currentStartyear = "";
+	String currentEndyear=(String) request.getAttribute("currentEndyear");
+	if (currentEndyear == null)
+		currentEndyear = "";
     int currentPage=(Integer) request.getAttribute("currentPage");
 %>
 
@@ -80,26 +94,26 @@ String imagePath = request.getScheme()+"://"+request.getServerName()+":"+request
        <div class="col-lg-6"  style="padding: 10px 0px 10px">
         <div class="input-group">
         		<span class="input-group-addon">作者</span>
-         <input name="author" type="text" class="form-control" placeholder="">
+         <input name="author" type="text" class="form-control" placeholder="" value="<%=currentAuthor%>">
         </div>
        </div>
        <div class="col-lg-6"  style="padding: 10px 0px 10px">
         <div class="input-group">
         		<span class="input-group-addon">出版单位</span>
-         <input type="text" class="form-control" placeholder="">
+         <input name="publisher" type="text" class="form-control" placeholder="" value="<%=currentPublisher%>">
         </div>
        </div>
        
        <div class="col-lg-6"  style="padding: 10px 0px 10px">
         <div class="input-group">
         		<span class="input-group-addon">最早年份</span>
-         <input name="author" type="text" class="form-control" placeholder="1901">
+         <input name="startyear" type="text" class="form-control" placeholder="1901" value="<%=currentStartyear%>">
         </div>
        </div>
        <div class="col-lg-6"  style="padding: 10px 0px 10px">
         <div class="input-group">
         		<span class="input-group-addon">最晚年份</span>
-         <input type="text" class="form-control" placeholder="2020">
+         <input name="endyear" type="text" class="form-control" placeholder="2020" value="<%=currentEndyear%>">
         </div>
        </div>
     </form>
@@ -112,18 +126,22 @@ String imagePath = request.getScheme()+"://"+request.getServerName()+":"+request
 <div class = "col-lg-4 col-lg-offset-2" style = "font-size:20px;">
   <p>
       <%if(currentPage>1){ %>
-          <a href="IRServer?query=<%=currentQuery%>&page=<%=currentPage-1%>">上一页</a>
+          <a href="IRServer?query=<%=currentQuery%>&page=<%=currentPage-1%>&author=<%=currentAuthor%>&publisher=<%=currentPublisher%>&startyear=<%=currentStartyear%>&endyear=<%=currentEndyear%>
+          ">上一页</a>
       <%}else{ %>
           <a>上一页</a>
       <%}; %>
       <%for (int i=Math.max(1,currentPage-5);i<currentPage;i++){%>
-          <a href="IRServer?query=<%=currentQuery%>&page=<%=i%>"><%=i%></a>
+          <a href="IRServer?query=<%=currentQuery%>&page=<%=i%>&author=<%=currentAuthor%>&publisher=<%=currentPublisher%>&startyear=<%=currentStartyear%>&endyear=<%=currentEndyear%>
+          "><%=i%></a>
       <%}; %>
       <strong><%=currentPage%></strong>
       <%for (int i=currentPage+1;i<=currentPage+5;i++){ %>
-          <a href="IRServer?query=<%=currentQuery%>&page=<%=i%>"><%=i%></a>
+          <a href="IRServer?query=<%=currentQuery%>&page=<%=i%>&author=<%=currentAuthor%>&publisher=<%=currentPublisher%>&startyear=<%=currentStartyear%>&endyear=<%=currentEndyear%>
+          "><%=i%></a>
       <%}; %>
-      <a href="IRServer?query=<%=currentQuery%>&page=<%=currentPage+1%>">下一页</a>
+      <a href="IRServer?query=<%=currentQuery%>&page=<%=currentPage+1%>&author=<%=currentAuthor%>&publisher=<%=currentPublisher%>&startyear=<%=currentStartyear%>&endyear=<%=currentEndyear%>
+      ">下一页</a>
   </p>
 </div>
 </div>
@@ -138,6 +156,9 @@ String imagePath = request.getScheme()+"://"+request.getServerName()+":"+request
     String[] titles=(String[]) request.getAttribute("titles");
     String[] titles_en=(String[]) request.getAttribute("titles_en");
     String[] abstracts=(String[]) request.getAttribute("abstracts");
+    String[] authors=(String[]) request.getAttribute("authors");
+    String[] publishers=(String[]) request.getAttribute("publishers");
+    String[] years=(String[]) request.getAttribute("years");
     if (titles != null && titles_en != null){
     	for(int i = 0; i<titles.length; i++){
         	if(titles[i].length() > 30) {
@@ -155,6 +176,7 @@ String imagePath = request.getScheme()+"://"+request.getServerName()+":"+request
         <div class = "col-lg-12" style = "margin-bottom:30px;margin-left:30px;">
         <p class = "col-lg-7" style="font-size:25px; margin:-2px;color:#1a0dab;"><%=titles[i]%></p>
         <p class = "col-lg-7" style = "font-size:15px; margin: -2px;color:#006621;"><%=titles_en[i]%></p>
+        <div class = "col-lg-7"><%=authors[i] + "  " + publishers[i] + "  " + years[i]%></div>
         <div class = "col-lg-7"><%=abstracts[i]%></div>
         </div><%};%>
     <%}else{ %>

@@ -71,20 +71,20 @@ System.out.println(basePath);
 				             <div class="col-lg-6"  style="padding: 10px 40px 10px">
 					             <div class="input-group">
 					             		<span class="input-group-addon">出版单位</span>
-							            <input type="text" class="form-control" placeholder="">
+							            <input name="publisher" type="text" class="form-control" placeholder="">
 					             </div>
 				             </div>
 
 				             <div class="col-lg-6"  style="padding: 10px 40px 10px">
 					             <div class="input-group">
 					             		<span class="input-group-addon">最早年份</span>
-							            <input name="author" type="text" class="form-control" placeholder="1901">
+							            <input name="startyear" type="text" class="form-control" placeholder="1901">
 					             </div>
 				             </div>
 				             <div class="col-lg-6"  style="padding: 10px 40px 10px">
 					             <div class="input-group">
 					             		<span class="input-group-addon">最晚年份</span>
-							            <input type="text" class="form-control" placeholder="2020">
+							            <input name="endyear" type="text" class="form-control" placeholder="2020">
 					             </div>
 				             </div>
 

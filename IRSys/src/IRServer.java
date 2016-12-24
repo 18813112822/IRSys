@@ -24,6 +24,7 @@ import com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1;
 import com.sun.org.apache.bcel.internal.generic.FLOAD;
 import com.sun.org.apache.bcel.internal.generic.INEG;
 import com.sun.org.apache.regexp.internal.recompile;
+import com.sun.org.apache.xpath.internal.operations.And;
 import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils.Text;
 
 import javafx.geometry.Pos;
@@ -47,9 +48,6 @@ public class IRServer extends HttpServlet {
     public static final String indexDir = "forIndex";
     public static final String picDir = "";
     private IRSearcher search = null;
-
-    private HashMap<Integer, String> TextCache = new HashMap<>();
-
 
     public IRServer() {
         super();
@@ -85,19 +83,19 @@ public class IRServer extends HttpServlet {
         }
     }
 
-    private ScoreDoc[] multiQuery(String queryString, int maxnum) {
+    private ScoreDoc[] multiQuery(Map<String, String> queryInfo, int maxnum) {
         HashMap<String, Float> weight = new HashMap<String, Float>();
         weight.put("题名", (float) 1.0);
         weight.put("英文篇名", (float) 1.0);
         weight.put("摘要", (float) 0.7);
         weight.put("英文摘要", (float) 0.7);
-        
-        
+
+
         HashMap<Integer, ScoreDoc> docs = new HashMap<>();
 
         for (HashMap.Entry<String, Float> entry : weight.entrySet()) {
-//			System.out.println(entry.getKey());
-            TopDocs results = search.searchQuery(queryString, entry.getKey(), 100);
+//          System.out.println(entry.getKey());
+            TopDocs results = search.searchQuery(queryInfo, entry.getKey(), 100);
             if (results == null || results.scoreDocs == null)
                 continue;
             ScoreDoc[] tmpdocs = results.scoreDocs;
@@ -135,7 +133,7 @@ public class IRServer extends HttpServlet {
         ArrayList<Integer> pos = new ArrayList<>();
         int index = 0;
         while ((index = text.indexOf(substring, index)) != -1) {
-//			System.out.println(substring + index);
+//          System.out.println(substring + index);
             pos.add(index);
             index += substring.length();
         }
@@ -149,7 +147,7 @@ public class IRServer extends HttpServlet {
         }
         split.add(0);
         for (int i = 1; i < flags.length; i++) {
-            if (flags[i] != flags[i-1]) {
+            if (flags[i] != flags[i - 1]) {
                 split.add(i);
             }
         }
@@ -158,8 +156,8 @@ public class IRServer extends HttpServlet {
     }
 
     private String highlightText(String text, String querystring) {
-    	if (text == null)
-    		return "";
+        if (text == null)
+            return "";
         List<Term> terms = IndexAnalysis.parse(querystring);
         ArrayList<String> arraystrings = new ArrayList<>();
         for (Term term : terms) {
@@ -168,7 +166,7 @@ public class IRServer extends HttpServlet {
             arraystrings.add(term.toString());
         }
         String[] strings = arraystrings.toArray(new String[0]);
-        
+
         char[] flags = new char[text.length()];
         for (int i = 0; i < text.length(); i++)
             flags[i] = 0;
@@ -208,70 +206,148 @@ public class IRServer extends HttpServlet {
         }
         return ans;
     }
+    
+    private  Map<String, String> getQueryInfo(HttpServletRequest request){
+    	HashMap<String, String> queryInfo = new HashMap();
+    	
+    	String queryString = request.getParameter("query");
+    	if (queryString != null && queryString.compareTo("") != 0)
+    		queryInfo.put("query", queryString);
+    	else
+    		queryInfo.put("query", "");
+    	
+    	String pageString = request.getParameter("page");
+    	if (pageString != null && pageString.compareTo("") != 0) {
+    		queryInfo.put("page", pageString);
+        }
+    	else {
+			queryInfo.put("page", "1");
+		}
+    	
+    	String authorString = request.getParameter("author");
+    	if (authorString != null && authorString.compareTo("") != 0) {
+    		queryInfo.put("author", authorString);
+        }
+    	else
+    		queryInfo.put("author", "");
+    	
+    	String publisherString = request.getParameter("publisher");
+    	if (publisherString != null && publisherString.compareTo("") != 0) {
+    		queryInfo.put("publisher", publisherString);
+        }
+    	else
+    		queryInfo.put("publisher", "");
+    	
+    	String startyearString = request.getParameter("startyear");
+    	if (startyearString != null) {
+    		int startyear;
+    		try {
+    			startyear = Integer.valueOf(startyearString);
+			} catch (Exception e) {
+				startyear = 1901;
+			}
+    		queryInfo.put("startyear", String.valueOf(startyear));
+        }
+    	
+    	String endyearString = request.getParameter("endyear");
+    	if (endyearString != null) {
+    		int endyear;
+    		try {
+    			endyear = Integer.valueOf(endyearString);
+    			queryInfo.put("endyear", String.valueOf(endyear));
+			} catch (Exception e) {
+				endyear = 2020;
+			}
+    		queryInfo.put("endyear", String.valueOf(endyear));
+        }
+    	return queryInfo;
+    }
 
     public void doGet(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
         response.setContentType("text/html;charset=utf-8");
         request.setCharacterEncoding("utf-8");
-        String queryString = request.getParameter("query");
-        String pageString = request.getParameter("page");
-        int page = 1;
-        if (pageString != null) {
-            page = Integer.parseInt(pageString);
-        }
-        if (queryString == null) {
-            System.out.println("null query");
-        } else {
-            System.out.println(queryString);
-            System.out.println(URLDecoder.decode(queryString, "utf-8"));
-            System.out.println(URLDecoder.decode(queryString, "gb2312"));
+        
+        Map<String, String> queryInfo = getQueryInfo(request);
+        
+        String queryString = queryInfo.get("query");
+        int page = Integer.valueOf(queryInfo.get("page"));
+       
+        System.out.println(queryString);
+        System.out.println(URLDecoder.decode(queryString, "utf-8"));
+        System.out.println(URLDecoder.decode(queryString, "gb2312"));
 
-            String[] titles = null;
-            String[] titles_en = null;
-            String[] abstracts = null;
-            TextCache.clear();
+        String[] titles = null;
+        String[] titles_en = null;
+        String[] abstracts = null;
+        String[] authors = null;
+        String[] publishers = null;
+        String[] years = null;
+        
 //            ScoreDoc[] results = multiQuery(queryString, 100);
-            TopDocs docresults = search.searchQuery(queryString, "", 100);
-            ScoreDoc[] results = null;
-            if (docresults != null)
-            	results = docresults.scoreDocs;
-            if (results != null) {
-                ScoreDoc[] hits = showList(results, page);
-                if (hits != null) {
-                    System.out.println(hits.length);
-                    titles = new String[hits.length];
-                    titles_en = new String[hits.length];
-                    abstracts = new String[hits.length];
-                    for (int i = 0; i < hits.length && i < PAGE_RESULT; i++) {
-                        Document doc = search.getDoc(hits[i].doc);
-                        titles[i] = doc.get("题名");
-                        if (titles[i] == null)
-                        	titles[i] = "";
-                        titles_en[i] = doc.get("英文篇名");
-                        if (titles_en[i] == null)
-                        	titles_en[i] = "";
-                        abstracts[i] = doc.get("摘要");
-                        if (abstracts[i] == null)
-                        	abstracts[i] = "";
-                        abstracts[i] = highlightText(abstracts[i], queryString).replaceAll("\n\r", " ").replaceAll("\n", " ");
-                        System.out.println(abstracts[i]);
-                        System.out.println("doc=" + hits[i].doc + " score=" + hits[i].score + " title=" + doc.get("题名"));
-                    }
-
-                } else {
-                    System.out.println("page null");
+        TopDocs docresults = search.searchQuery(queryInfo, "", 100);
+        
+        ScoreDoc[] results = null;
+        if (docresults != null)
+            results = docresults.scoreDocs;
+        if (results != null) {
+            ScoreDoc[] hits = showList(results, page);
+            if (hits != null) {
+                System.out.println(hits.length);
+                titles = new String[hits.length];
+                titles_en = new String[hits.length];
+                abstracts = new String[hits.length];
+                authors = new String[hits.length];
+                publishers = new String[hits.length];
+                years = new String[hits.length];
+                
+                for (int i = 0; i < hits.length && i < PAGE_RESULT; i++) {
+                    Document doc = search.getDoc(hits[i].doc);
+                    titles[i] = doc.get("题名");
+                    if (titles[i] == null)
+                        titles[i] = "";
+                    titles_en[i] = doc.get("英文篇名");
+                    if (titles_en[i] == null)
+                        titles_en[i] = "";
+                    abstracts[i] = doc.get("摘要");
+                    if (abstracts[i] == null)
+                        abstracts[i] = "";
+                    authors[i] = doc.get("作者");
+                    if (authors[i] == null)
+                        authors[i] = "";
+                    publishers[i] = doc.get("出版单位");
+                    if (publishers[i] == null)
+                        publishers[i] = "";
+                    years[i] = doc.get("年");
+                    if (years[i] == null)
+                        years[i] = "";
+                    
+                    abstracts[i] = highlightText(abstracts[i], queryString).replaceAll("\n\r", " ").replaceAll("\n", " ");
+                    System.out.println(abstracts[i]);
+                    System.out.println("doc=" + hits[i].doc + " score=" + hits[i].score + " title=" + doc.get("题名"));
                 }
+
             } else {
-                System.out.println("result null");
+                System.out.println("page null");
             }
-            request.setAttribute("currentQuery", queryString);
-            request.setAttribute("currentPage", page);
-            request.setAttribute("titles", titles);
-            request.setAttribute("titles_en", titles_en);
-            request.setAttribute("abstracts", abstracts);
-            request.getRequestDispatcher("/show.jsp").forward(request,
-                    response);
+        } else {
+            System.out.println("result null");
         }
+        request.setAttribute("currentQuery", queryString);
+        request.setAttribute("currentPage", page);
+        request.setAttribute("currentAuthor", queryInfo.get("author"));
+        request.setAttribute("currentPublisher", queryInfo.get("publisher"));
+        request.setAttribute("currentStartyear", queryInfo.get("startyear"));
+        request.setAttribute("currentEndyear", queryInfo.get("endyear"));
+        request.setAttribute("titles", titles);
+        request.setAttribute("titles_en", titles_en);
+        request.setAttribute("abstracts", abstracts);
+        request.setAttribute("authors", authors);
+        request.setAttribute("publishers", publishers);
+        request.setAttribute("years", years);
+        request.getRequestDispatcher("/show.jsp").forward(request,
+                response);
+
     }
 
     public void doPost(HttpServletRequest request, HttpServletResponse response)

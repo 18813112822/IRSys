@@ -3,6 +3,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -15,8 +16,10 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryParser.MultiFieldQueryParser;
+import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.NumericRangeQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TermQuery;
@@ -49,16 +52,40 @@ public class IRSearcher {
 		}
 	}
 
-	public TopDocs searchQuery(String queryString, String field, int maxnum) {
+	public TopDocs searchQuery(Map<String, String> queryInfo, String field, int maxnum) {
 		try {
-			HashMap<String,Float> boosts = new HashMap<String,Float>();
-			boosts.put("题名", 10f);
-			boosts.put("英文篇名", 10f);
-			boosts.put("摘要", 5f);
-			boosts.put("英文摘要", 5f);
-			String[] fields = boosts.keySet().toArray(new String[0]);
-			MultiFieldQueryParser queryParser = new MultiFieldQueryParser(Version.LUCENE_35, fields, analyzer, boosts);
-			Query query = queryParser.parse(queryString);
+			BooleanQuery query = new BooleanQuery();
+			
+			if (!queryInfo.get("query").equals("")){
+				String queryString = queryInfo.get("query");
+				HashMap<String,Float> boosts = new HashMap<String,Float>();
+				boosts.put("题名", 10f);
+				boosts.put("英文篇名", 10f);
+				boosts.put("摘要", 5f);
+				boosts.put("英文摘要", 5f);
+				String[] fields = boosts.keySet().toArray(new String[0]);
+				MultiFieldQueryParser queryParser = new MultiFieldQueryParser(Version.LUCENE_35, fields, analyzer, boosts);
+				Query muiltiQuery = queryParser.parse(queryString);
+				query.add(muiltiQuery, Occur.MUST);
+			}
+			if (!queryInfo.get("author").equals("")){
+				String authorString = queryInfo.get("author");
+				QueryParser queryParser = new QueryParser(Version.LUCENE_35, "作者", analyzer);
+				Query termQuery = queryParser.parse(authorString);
+				query.add(termQuery, Occur.MUST);
+			}
+			if (!queryInfo.get("publisher").equals("")){
+				String publisherString = queryInfo.get("publisher");
+				QueryParser queryParser = new QueryParser(Version.LUCENE_35, "出版单位", analyzer);
+				Query termQuery = queryParser.parse(publisherString);
+				query.add(termQuery, Occur.MUST);
+			}
+			
+			Query yearQuery = NumericRangeQuery.newIntRange("年", Integer.valueOf(queryInfo.get("startyear")), 
+					Integer.valueOf(queryInfo.get("endyear")), true, true);
+			
+			query.add(yearQuery, Occur.MUST);
+			
 //			TokenStream tokenStream  = analyzer.tokenStream(field, new StringReader(queryString));
 //			CharTermAttribute charTermAttribute = tokenStream.addAttribute(CharTermAttribute.class);
 //			System.out.println(field+" tokens:");
@@ -122,8 +149,9 @@ public class IRSearcher {
 	public static void main(String[] args) {
 		IRSearcher search = new IRSearcher("forIndex/index");
 		search.loadGlobals("forIndex/global.txt");
-		
-		TopDocs results = search.searchQuery("清华", "题名", 100);
+		HashMap<String, String> queryInfo = new HashMap<>();
+		queryInfo.put("query", "清华");
+		TopDocs results = search.searchQuery(queryInfo, "题名", 100);
 		ScoreDoc[] hits = results.scoreDocs;
 		for (int i = 0; i < hits.length; i++) {
 			Document doc = search.getDoc(hits[i].doc);

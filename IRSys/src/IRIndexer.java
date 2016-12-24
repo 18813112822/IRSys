@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.ansj.lucene3.AnsjAnalysis;
+import org.ansj.lucene3.AnsjIndexAnalysis;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.AbstractField;
 import org.apache.lucene.document.Document;
@@ -22,8 +23,8 @@ public class IRIndexer {
     private HashMap<String, Float> globals = new HashMap<String, Float>();
     
     public IRIndexer(String indexDir) {
-    	analyzer = new AnsjAnalysis();
-//    	analyzer = new AnsjIndexAnalysis();
+//    	analyzer = new AnsjAnalysis();
+    	analyzer = new AnsjIndexAnalysis();
 //    	analyzer = new MyAnalyzer();
         try {
             IndexWriterConfig iwc = new IndexWriterConfig(Version.LUCENE_35, analyzer);
