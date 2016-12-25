@@ -75,7 +75,7 @@ public class IRSearcher {
 			String[] fields = boosts.keySet().toArray(new String[0]);
 			MultiFieldQueryParser queryParser = new MultiFieldQueryParser(Version.LUCENE_35, fields, analyzer, boosts);
 			Query muiltiQuery = queryParser.parse(queryString);
-			muiltiQuery.setBoost(1f);
+			muiltiQuery.setBoost(10f);
 			query.add(muiltiQuery, Occur.SHOULD);
 			
 			
