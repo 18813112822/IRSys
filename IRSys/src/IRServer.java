@@ -158,52 +158,69 @@ public class IRServer extends HttpServlet {
     private String highlightText(String text, String querystring) {
         if (text == null)
             return "";
-        List<Term> terms = IndexAnalysis.parse(querystring);
-        ArrayList<String> arraystrings = new ArrayList<>();
-        for (Term term : terms) {
-            if (IRSearcher.STOPWORDS.contains(term.toString()))
-                continue;
-            arraystrings.add(term.toString());
-        }
-        String[] strings = arraystrings.toArray(new String[0]);
-
-        char[] flags = new char[text.length()];
-        for (int i = 0; i < text.length(); i++)
-            flags[i] = 0;
-
-        for (String term : strings) {
-            ArrayList<Integer> poss = allIndexOf(text, term);
-            for (int pos : poss) {
-                for (int i = pos; i < pos + term.length(); i++)
-                    flags[i] = 1;
-            }
-        }
-
-        ArrayList<Integer> split = getSplitIndex(flags);
         String ans = "";
-        for (int i = 1; i < split.size(); i++) {
-            String substring = text.substring(split.get(i - 1), split.get(i));
-            char flag = flags[split.get(i - 1)];
-            if (flag == 0) {
-                int remain = 7;
-                String prex = "<span>";
-                String subx = "</span>";
-                if (substring.length() > remain * 4) {
-                    String prefix = substring.substring(0, remain);
-                    String suffix = substring.substring(substring.length() - remain, substring.length());
-                    substring = prefix + "..." + suffix;
+        try {
+        	Word2Vec vec = new Word2Vec();  
+            vec.loadModel("vectors_s100_w20.bin");
+            
+            List<Term> terms = IndexAnalysis.parse(querystring);
+            ArrayList<String> arraystrings = new ArrayList<>();
+            for (Term term : terms) {
+                if (IRSearcher.STOPWORDS.contains(term.toString()))
+                    continue;
+                String termString = term.toString();
+                if (!arraystrings.contains(termString)){
+                	arraystrings.add(termString);
+                    Word2Vec.WordEntry[] results = vec.distance(termString).toArray(new Word2Vec.WordEntry[0]);
+                    for (int i = 0; i < 3; i++){
+                    	String nearterm = results[i].name;
+                    	if (!arraystrings.contains(nearterm))
+                    		arraystrings.add(nearterm);
+                    }
                 }
-                substring = prex + substring + subx;
             }
-            if (flag == 1) {
-                String prefix = "<span class = 'highlight'>";
-                String suffix = "</span>";
-                substring = prefix + substring + suffix;
+            String[] strings = arraystrings.toArray(new String[0]);
+
+            char[] flags = new char[text.length()];
+            for (int i = 0; i < text.length(); i++)
+                flags[i] = 0;
+
+            for (String term : strings) {
+                ArrayList<Integer> poss = allIndexOf(text, term);
+                for (int pos : poss) {
+                    for (int i = pos; i < pos + term.length(); i++)
+                        flags[i] = 1;
+                }
             }
-            ans += substring;
-            if (ans.length() > 400)
-                break;
-        }
+
+            ArrayList<Integer> split = getSplitIndex(flags);
+           
+            for (int i = 1; i < split.size(); i++) {
+                String substring = text.substring(split.get(i - 1), split.get(i));
+                char flag = flags[split.get(i - 1)];
+                if (flag == 0) {
+                    int remain = 7;
+                    String prex = "<span>";
+                    String subx = "</span>";
+                    if (substring.length() > remain * 4) {
+                        String prefix = substring.substring(0, remain);
+                        String suffix = substring.substring(substring.length() - remain, substring.length());
+                        substring = prefix + "..." + suffix;
+                    }
+                    substring = prex + substring + subx;
+                }
+                if (flag == 1) {
+                    String prefix = "<span class = 'highlight'>";
+                    String suffix = "</span>";
+                    substring = prefix + substring + suffix;
+                }
+                ans += substring;
+                if (ans.length() > 400)
+                    break;
+            }
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
         return ans;
     }
     

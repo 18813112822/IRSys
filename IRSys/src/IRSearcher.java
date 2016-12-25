@@ -51,6 +51,58 @@ public class IRSearcher {
 			e.printStackTrace();
 		}
 	}
+	
+	BooleanQuery nearQuery(String queryString){
+		BooleanQuery query = new BooleanQuery();
+		try {
+			TokenStream tokenStream  = analyzer.tokenStream("", new StringReader(queryString));
+			CharTermAttribute charTermAttribute = tokenStream.addAttribute(CharTermAttribute.class);
+			
+			ArrayList<String> termstrings = new ArrayList<>();
+			
+			while (tokenStream.incrementToken()) {
+				String termStr = charTermAttribute.toString();
+				if (termstrings.contains(termStr))
+					continue;
+				termstrings.add(termStr);
+			}
+			
+			HashMap<String,Float> boosts = new HashMap<String,Float>();
+			boosts.put("题名", 10f);
+			boosts.put("英文篇名", 10f);
+			boosts.put("摘要", 5f);
+			boosts.put("英文摘要", 5f);
+			String[] fields = boosts.keySet().toArray(new String[0]);
+			MultiFieldQueryParser queryParser = new MultiFieldQueryParser(Version.LUCENE_35, fields, analyzer, boosts);
+			Query muiltiQuery = queryParser.parse(queryString);
+			muiltiQuery.setBoost(1f);
+			query.add(muiltiQuery, Occur.SHOULD);
+			
+			
+			Word2Vec vec = new Word2Vec();  
+	        vec.loadModel("vectors_s100_w20.bin");
+	        
+	        for (int i = 0; i < termstrings.size(); i++){
+	        	String term = termstrings.get(i);
+	        	ArrayList<String> newterms = new ArrayList<>(termstrings);
+	        	Word2Vec.WordEntry[] results = vec.distance(term).toArray(new Word2Vec.WordEntry[0]);
+	        	
+	        	for (int j = 0; j < 3; j++){
+	        		Word2Vec.WordEntry result = results[j];
+	        		newterms.set(i, result.name);
+		        	String newquerystring = String.join("", newterms);
+		        	System.out.println(queryString + "->" + newquerystring);
+		        	queryParser = new MultiFieldQueryParser(Version.LUCENE_35, fields, analyzer, boosts);
+		        	Query newquery = queryParser.parse(newquerystring);
+		        	newquery.setBoost(0.5f);
+		        	query.add(newquery, Occur.SHOULD);
+	        	}
+	        }
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return query;
+	}
 
 	public TopDocs searchQuery(Map<String, String> queryInfo, String field, int maxnum) {
 		try {
@@ -58,15 +110,8 @@ public class IRSearcher {
 			
 			if (!queryInfo.get("query").equals("")){
 				String queryString = queryInfo.get("query");
-				HashMap<String,Float> boosts = new HashMap<String,Float>();
-				boosts.put("题名", 10f);
-				boosts.put("英文篇名", 10f);
-				boosts.put("摘要", 5f);
-				boosts.put("英文摘要", 5f);
-				String[] fields = boosts.keySet().toArray(new String[0]);
-				MultiFieldQueryParser queryParser = new MultiFieldQueryParser(Version.LUCENE_35, fields, analyzer, boosts);
-				Query muiltiQuery = queryParser.parse(queryString);
-				query.add(muiltiQuery, Occur.MUST);
+				BooleanQuery nearQuery = nearQuery(queryString);
+				query.add(nearQuery, Occur.MUST);
 			}
 			if (!queryInfo.get("author").equals("")){
 				String authorString = queryInfo.get("author");

@@ -15,10 +15,10 @@ public class Word2Vec {
       
     public static void main(String[] args) throws IOException {  
         Word2Vec vec = new Word2Vec();  
-        vec.loadModel("/home/felven/word2vec/vectors.bin");  
+        vec.loadModel("vectors_s100_w20.bin");  
   
         System.out.println("One word analysis");  
-        Set<WordEntry> result = new TreeSet<WordEntry>();  
+        Set<WordEntry> result = new TreeSet<WordEntry>(); 
         result = vec.distance("男人");  
         Iterator<WordEntry> iter = result.iterator();  
         while (iter.hasNext()) {  
